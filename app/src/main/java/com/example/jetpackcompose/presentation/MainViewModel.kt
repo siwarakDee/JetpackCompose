@@ -9,18 +9,21 @@ import com.example.jetpackcompose.extension.runOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
-class MainViewModel(val useCase:UseCase<Unit,FetchModel>) :ViewModel() {
+class MainViewModel(private val useCase:UseCase<Unit,FetchModel>) :ViewModel() {
 
     private val _dogImage  = MutableLiveData<String>()
     val dogImage = _dogImage
 
+    private val _loading  = MutableLiveData<Boolean>(false)
+    val loading = _loading
+
     fun fetchDog(){
         useCase.invoke(Unit)
             .onStart {
-               // showLoading()
+               _loading.value = true
             }
             .onCompletion {
-               // hideLoading()
+               _loading.value = false
             }
             .runOn(viewModelScope) { result ->
                 result.onSuccess {

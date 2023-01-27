@@ -8,26 +8,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil.compose.rememberAsyncImagePainter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.example.jetpackcompose.ui.theme.JetpackComposeTheme
+import com.example.jetpackcompose.ui.widget.DialogBoxLoading
 import com.example.jetpackcompose.ui.widget.ImageViewFromUrl
 import com.example.jetpackcompose.ui.widget.PrimaryButton
 import com.example.jetpackcompose.ui.widget.TitleBar
 
 class MainActivity : ComponentActivity() {
 
-    val viewModel :MainViewModel by viewModel()
+    private val viewModel :MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +31,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             JetpackComposeTheme {
                 val favourites = remember { mutableStateListOf<Pair<String,String>>()}
+                val image by viewModel.dogImage.observeAsState(null)
+                val openDialog by viewModel.loading.observeAsState(false)
+                val recentUrl = remember { mutableStateOf<String?>(null) }
 
                 ConstraintLayout(modifier = Modifier.fillMaxSize()){
                     val (titleBar, searchButton, imageList) = createRefs()
@@ -50,8 +49,9 @@ class MainActivity : ComponentActivity() {
                         listState.animateScrollToItem(favourites.size)
                     }
 
-                    LazyColumn(state = listState,modifier = Modifier.fillMaxWidth()
-                        .constrainAs(imageList){
+                    LazyColumn(state = listState,modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(imageList) {
                             top.linkTo(titleBar.bottom)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
@@ -64,15 +64,24 @@ class MainActivity : ComponentActivity() {
                     }
 
                     PrimaryButton(text = "Random", onClick = {viewModel.fetchDog()},
-                    modifier = Modifier.constrainAs(searchButton){
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom,16.dp)
-                    }.wrapContentHeight().wrapContentWidth())
+                    modifier = Modifier
+                        .constrainAs(searchButton) {
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom, 16.dp)
+                        }
+                        .wrapContentHeight()
+                        .wrapContentWidth())
                 }
 
-                viewModel.dogImage.observe(this@MainActivity){
-                    favourites.add(Pair("name",it))
+                image?.let {
+                    if (recentUrl.value!=it){
+                        recentUrl.value = it
+                        favourites.add(Pair("name",it))
+                    }
+                }
+                if (openDialog) {
+                    DialogBoxLoading()
                 }
 
             }
