@@ -14,7 +14,7 @@ import coil.compose.rememberAsyncImagePainter
 
 
 @Composable
-fun ImageViewFromUrl(url: String) {
+fun ImageViewFromUrl(url: String,modifier: Modifier) {
     Image(
         painter = rememberAsyncImagePainter(url),
         contentDescription = null,
@@ -23,5 +23,6 @@ fun ImageViewFromUrl(url: String) {
             .padding(vertical = 12.dp, horizontal = 24.dp)
             .fillMaxWidth()
             .aspectRatio(1.0f).border(2.dp, Color.Gray)
+            .then(modifier)
     )
 }

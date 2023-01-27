@@ -25,6 +25,19 @@ fun PrimaryButton(text:String,onClick:()->Unit,modifier: Modifier){
     }
 }
 
+@Composable
+fun SecondaryButton(text:String,onClick:()->Unit,modifier: Modifier){
+    Button(onClick = onClick,
+        shape= RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Red,
+            disabledBackgroundColor= Color.LightGray),
+        modifier = modifier
+    ){
+        TextBody(text = text,color = Color.White,Modifier)
+    }
+}
+
 @Preview
 @Composable
 fun PreviewPrimaryButton(){
